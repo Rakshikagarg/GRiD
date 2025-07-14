@@ -5,3 +5,4 @@ declare global {
   }
 }
 export {};
+declare module 'razorpay';
