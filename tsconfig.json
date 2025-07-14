@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "target": "es2016",
+    "types": ["node", "razorpay"],
+    "module": "commonjs",
+    "jsx": "react",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noImplicitAny": false,  // Allow implicit any for cases where needed
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "checkJs": true,
+    "moduleResolution": "node",
+    "lib": ["dom", "es2015"],
+    "skipDefaultLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "declaration": true,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": ".",
+    "paths": {
+      "*": ["node_modules/*", "src/types/*"]
+    }
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/types/**/*.d.ts"  // Include the custom type declaration files
+  ],
+  "exclude": ["node_modules"]
+}
