@@ -24,7 +24,6 @@ const Login: React.FC<LoginProps> = ({ show, onClose }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const navigate = useNavigate();
 
-  // ✅ Email/Password Login
   const handleLoginSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -49,7 +48,11 @@ const Login: React.FC<LoginProps> = ({ show, onClose }) => {
       if (response.ok) {
         alert(`Welcome back!`);
         onClose();
-        navigate('/welcome');
+        if (result.role === 'admin') {
+          navigate('/admin-dashboard');
+        } else {
+          navigate('/welcome');
+        }
       } else {
         alert(result.error || 'Login failed');
       }
@@ -63,7 +66,6 @@ const Login: React.FC<LoginProps> = ({ show, onClose }) => {
     }
   };
 
-  // ✅ Google Sign In
   const handleGoogleSignIn = async () => {
     const auth = getAuth();
     const provider = new GoogleAuthProvider();
@@ -75,10 +77,7 @@ const Login: React.FC<LoginProps> = ({ show, onClose }) => {
       const response = await fetch('http://localhost:5000/google-login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: user.email,
-          uid: user.uid
-        })
+        body: JSON.stringify({ email: user.email, uid: user.uid })
       });
 
       let data;
@@ -94,7 +93,7 @@ const Login: React.FC<LoginProps> = ({ show, onClose }) => {
       if (response.ok) {
         alert(`Welcome ${user.displayName || 'user'}! Signed in with Google.`);
         onClose();
-        navigate('/welcome');
+        navigate('/welcome'); // Assuming Google login is for users only
       } else {
         alert(data.error || 'Google login failed');
       }
@@ -117,17 +116,16 @@ const Login: React.FC<LoginProps> = ({ show, onClose }) => {
               type="email"
               placeholder="Email"
               value={email}
-              onChange={(e: { target: { value: React.SetStateAction<string>; }; }) => setEmail(e.target.value)}
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
             <Input
               type="password"
               placeholder="Password"
               value={password}
-              onChange={(e: { target: { value: React.SetStateAction<string>; }; }) => setPassword(e.target.value)}
+              onChange={(e) => setPassword(e.target.value)}
               required
             />
-
             <Button type="submit" disabled={loading}>
               {loading ? 'Logging In…' : 'Log In'}
             </Button>
@@ -145,7 +143,7 @@ const Login: React.FC<LoginProps> = ({ show, onClose }) => {
 
             <Button
               type="button"
-              onClick={() => onClose()}
+              onClick={onClose}
               disabled={loading}
               style={{ backgroundColor: '#999' }}
             >

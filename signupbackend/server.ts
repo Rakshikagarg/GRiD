@@ -111,27 +111,35 @@ app.post('/google-signup', async (req, res) => {
 app.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
+  // ✅ Hardcoded admin check
+  const ADMIN_EMAIL = 'grid.pro11@gmail.com';
+  const ADMIN_PASSWORD = 'admin123';
+
+  if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+    return res.status(200).json({ message: 'Admin login successful', role: 'admin' });
+  }
+
+  // Otherwise, check in database for normal users
   try {
     const userRes = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
     const user = userRes.rows[0];
 
     if (!user) {
-      res.status(404).json({ error: 'Email not found' });
-      return;
+      return res.status(404).json({ error: 'Email not found' });
     }
 
     const match = await bcrypt.compare(password, user.password);
     if (!match) {
-      res.status(401).json({ error: 'Incorrect password' });
-      return;
+      return res.status(401).json({ error: 'Incorrect password' });
     }
 
-    res.status(200).json({ message: 'Login successful', name: user.name });
+    res.status(200).json({ message: 'Login successful', name: user.name, role: 'user' });
   } catch (err) {
     console.error('Login error:', err);
     res.status(500).json({ error: 'Server error during login' });
   }
 });
+
 
 // ➤ GOOGLE LOGIN ROUTE
 app.post('/google-login', async (req, res) => {
