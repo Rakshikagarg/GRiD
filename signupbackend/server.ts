@@ -176,3 +176,22 @@ app.post('/google-login', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
+// ➤ HEALTH CHECK ROUTE
+app.get('/health', async (req, res) => {
+  try {
+    const db = await pool.query('SELECT NOW()');
+    res.status(200).json({
+      status: '✅ Server is healthy',
+      dbTime: db.rows[0].now,
+      version: '1.0.0', 
+      uptime: process.uptime(),
+      message: 'GRiD backend and database are operational.'
+    });
+  } catch (err: any) {
+    console.error('❌ Health check DB error:', err);
+    res.status(500).json({
+      status: '❌ Server is running but DB check failed',
+      error: err.message
+    });
+  }
+});
