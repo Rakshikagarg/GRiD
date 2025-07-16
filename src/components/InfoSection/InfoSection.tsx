@@ -10,21 +10,20 @@ import {
 } from './InfoSection.elements';
 import { Container, Button } from '../../globalStyles';
 
-// Type definition for the props
 interface InfoSectionProps {
-  primary?: boolean;               // Determines the button style (primary or not)
-  lightBg?: boolean;               // Determines background light/dark
-  topLine: string;                 // The top line text
-  lightTopLine?: boolean;          // Determines the light color for the top line
-  lightText?: boolean;             // Determines if heading text is light
-  lightTextDesc?: boolean;         // Determines if subtitle text is light
-  headline: string;                // Main headline text
-  description: string;             // Description under the headline
-  buttonLabel: string;             // Button label text
-  onButtonClick?: () => void;      // Button click handler
-  img?: string;                    // Image URL for background image
-  alt: string;                     // Alt text for the image
-  imgStart?: boolean;              // Determines if the image is on the left or right side
+  primary?: boolean;
+  lightBg?: boolean;
+  topLine: string;
+  lightTopLine?: boolean;
+  lightText?: boolean;
+  lightTextDesc?: boolean;
+  headline: string;
+  description: string;
+  buttonLabel: string;
+  onButtonClick?: () => void;
+  img?: string;
+  alt: string;
+  imgStart?: boolean;
 }
 
 const InfoSection: React.FC<InfoSectionProps> = ({
@@ -56,9 +55,7 @@ const InfoSection: React.FC<InfoSectionProps> = ({
               </Button>
             </TextWrapper>
           </InfoColumn>
-          <InfoColumn>
-            {img && <img src={img} alt={alt} />} {/* Optional image */}
-          </InfoColumn>
+          {/* Removed duplicated image column to avoid background conflict */}
         </InfoRow>
       </Container>
     </InfoSec>

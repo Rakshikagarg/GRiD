@@ -1,8 +1,9 @@
 {
-  "name": "server",
+  "name": "payment",
   "version": "1.0.0",
   "main": "server.ts",
   "scripts": {
+    "start": "nodemon server.ts",
     "dev": "nodemon server.ts"
   },
   "dependencies": {

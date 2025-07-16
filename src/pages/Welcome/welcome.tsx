@@ -148,13 +148,20 @@ const onPremiumSubscribe = async () => {
     const res = await axios.post('http://localhost:4000/api/createOrder', {
       courseId: 1,
       amount: 499,
-      email: user.email, // ✅ use current user's email
+      email: user.email,
     });
 
     const { order } = res.data;
 
+    if (!order || !order.id) {
+      alert('Order creation failed. Please try again.');
+      return;
+    }
+
+    console.log("Razorpay Order:", order);
+
     const paymentObject = new window.Razorpay({
-      key: 'rzp_test_kYYzXMNi8ZNAQr', // ✅ replace with your actual Razorpay key
+      key: 'rzp_test_QwSnDVvAZGNjT8',
       amount: order.amount,
       currency: order.currency,
       name: 'GRiD Learning',
@@ -185,7 +192,11 @@ const onPremiumSubscribe = async () => {
       },
     });
 
-    paymentObject.open();
+    // Delay popup slightly to avoid race condition
+    setTimeout(() => {
+      paymentObject.open();
+    }, 300);
+    
   } catch (err: unknown) {
     if (axios.isAxiosError(err)) {
       console.error('Axios error response:', err.response?.data);
@@ -196,6 +207,7 @@ const onPremiumSubscribe = async () => {
     }
   }
 };
+
 
   const onDemoStart = () => {
     alert('✅ Your 7-day demo access is now active!');
