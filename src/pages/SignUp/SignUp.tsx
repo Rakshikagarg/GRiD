@@ -104,11 +104,22 @@ const SignUp: React.FC<SignUpProps> = ({ show, onClose }) => {
       }
 
       if (response.ok) {
+        // ✅ Send welcome email explicitly after Google signup
+        await fetch('http://localhost:5000/send-confirmation-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: user.displayName,
+            email: user.email,
+            firebase_uid: user.uid
+          })
+        });
+
         alert(`Welcome ${user.displayName || 'user'}! Signed in with Google.`);
         onClose();
         navigate('/welcome');
       } else if (response.status === 409) {
-        alert('This  account is already registered.');
+        alert('This account is already registered.');
       } else {
         alert(data.error || 'Google signup failed');
       }

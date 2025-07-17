@@ -1,4 +1,3 @@
-// server.ts
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
@@ -72,12 +71,11 @@ app.post('/signup', async (req, res) => {
   }
 });
 
-
-// ➤ GOOGLE SIGNUP ROUTE (block repeat signup with 409)
+// ➤ GOOGLE SIGNUP ROUTE
 app.post('/google-signup', async (req, res) => {
   const name = req.body.name;
   const rawEmail = req.body.email;
-  const email = rawEmail.toLowerCase().trim(); // ✅ Normalize email
+  const email = rawEmail.toLowerCase().trim();
   const uid = req.body.uid;
 
   if (!email || !uid || !name) {
@@ -111,7 +109,6 @@ app.post('/google-signup', async (req, res) => {
 app.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
-  // ✅ Hardcoded admin check
   const ADMIN_EMAIL = 'grid.pro11@gmail.com';
   const ADMIN_PASSWORD = 'admin123';
 
@@ -119,7 +116,6 @@ app.post('/login', async (req, res) => {
     return res.status(200).json({ message: 'Admin login successful', role: 'admin' });
   }
 
-  // Otherwise, check in database for normal users
   try {
     const userRes = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
     const user = userRes.rows[0];
@@ -140,15 +136,13 @@ app.post('/login', async (req, res) => {
   }
 });
 
-
 // ➤ GOOGLE LOGIN ROUTE
 app.post('/google-login', async (req, res) => {
   console.log('✅ Received Google login request');
   const { email, uid } = req.body;
 
   if (!email || !uid) {
-    res.status(400).json({ error: 'Missing email or UID' });
-    return;
+    return res.status(400).json({ error: 'Missing email or UID' });
   }
 
   try {
@@ -160,10 +154,9 @@ app.post('/google-login', async (req, res) => {
     const user = userRes.rows[0];
 
     if (!user) {
-      res.status(403).json({
+      return res.status(403).json({
         error: 'Google account not registered. Please sign up first.'
       });
-      return;
     }
 
     res.status(200).json({ message: 'Login successful', name: user.name });
@@ -173,9 +166,23 @@ app.post('/google-login', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+// ✅ ➤ SEND WELCOME EMAIL AFTER LOGIN (manual trigger from frontend)
+app.post('/send-confirmation-email', async (req, res) => {
+  const { name, email } = req.body;
+
+  if (!name || !email) {
+    return res.status(400).json({ error: 'Missing name or email' });
+  }
+
+  try {
+    await sendWelcomeEmail(email, name);
+    res.status(200).json({ message: 'Welcome email sent successfully' });
+  } catch (err) {
+    console.error('Error sending welcome email:', err);
+    res.status(500).json({ error: 'Failed to send welcome email' });
+  }
 });
+
 // ➤ HEALTH CHECK ROUTE
 app.get('/health', async (req, res) => {
   try {
@@ -183,7 +190,7 @@ app.get('/health', async (req, res) => {
     res.status(200).json({
       status: '✅ Server is healthy',
       dbTime: db.rows[0].now,
-      version: '1.0.0', 
+      version: '1.0.0',
       uptime: process.uptime(),
       message: 'GRiD backend and database are operational.'
     });
@@ -194,4 +201,8 @@ app.get('/health', async (req, res) => {
       error: err.message
     });
   }
+});
+
+app.listen(PORT, () => {
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
