@@ -2,7 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import bcrypt from 'bcrypt';
-import pool from './db'; // Import the initialized pool
+import pool from './db'; 
 import sgMail from '@sendgrid/mail';
 
 dotenv.config();
@@ -166,7 +166,7 @@ app.post('/google-login', async (req, res) => {
   }
 });
 
-// ✅ ➤ SEND WELCOME EMAIL AFTER LOGIN (manual trigger from frontend)
+// ✅ ➤ SEND WELCOME EMAIL AFTER LOGIN 
 app.post('/send-confirmation-email', async (req, res) => {
   const { name, email } = req.body;
 
