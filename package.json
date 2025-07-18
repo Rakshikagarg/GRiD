@@ -32,14 +32,14 @@
     "web-vitals": "^0.2.4"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "backend-signup": "cd signupbackend && npm start",
-    "backend-payment": "cd payment && npm start",
-    "dev": "concurrently \"npm run backend-signup\" \"npm run backend-payment\""
-  },
+  "start": "react-scripts start",
+  "build": "react-scripts build",
+  "test": "react-scripts test",
+  "eject": "react-scripts eject",
+  "backend-signup": "cd signupbackend && npm start",
+  "backend-payment": "npm --prefix ./src/payment start",
+  "dev": "concurrently \"npm run backend-signup\" \"npm run backend-payment\""
+},
   "eslintConfig": {
     "extends": [
       "react-app",
