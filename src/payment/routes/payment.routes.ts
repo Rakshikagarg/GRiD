@@ -1,9 +1,11 @@
-import express from 'express';
-import { createOrder, verifyPayment } from '../control/payment.controll';
+// payment.routes.ts
+import { Router } from 'express';
+import { createOrder, verifyPayment } from '../control/payment.controll'; // Correct the import path
 
-const router = express.Router();
+const router = Router();
 
-router.post('/createOrder', createOrder);
-router.post('/verifyPayment', verifyPayment);
+// Define routes for payment-related operations
+router.post('/create-order', createOrder);
+router.post('/verify-payment', verifyPayment);
 
 export default router;

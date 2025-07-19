@@ -1,33 +1,27 @@
+// payment.controll.ts
 import { Request, Response } from 'express';
 import crypto from 'crypto';
-import { createRazorpayInstance } from '../config/razorpay.config';
-import pool from '../../../signupbackend/db'; // PostgreSQL connection
 import sgMail from '@sendgrid/mail';
+import { createRazorpayInstance } from '../config/razorpay.config';
+import supabase from '../../../signupbackend/db'; // Correct path to Supabase client
 
 const razorpayInstance = createRazorpayInstance();
 sgMail.setApiKey(process.env.SENDGRID_API_KEY || '');
 
-type RazorpayOrderOptions = {
-  amount: number;
-  currency: string;
-  receipt: string;
-};
-
-// Create Razorpay Order
-// Create Razorpay Order
+// Create Order Function
 export const createOrder = async (req: Request, res: Response): Promise<void> => {
-  const { courseId, amount, email } = req.body;
+  const { courseId, amount, email, uid } = req.body;
 
-  if (!courseId || !amount || !email) {
+  if (!courseId || !amount || !email || !uid) {
     res.status(400).json({
       success: false,
-      message: 'Course ID, amount, and email are required',
+      message: 'Course ID, amount, email, and uid are required',
     });
     return;
   }
 
-  const options: RazorpayOrderOptions = {
-    amount: amount * 100, // in paise
+  const options = {
+    amount: amount * 100, // Razorpay expects the amount in paise (1 INR = 100 paise)
     currency: 'INR',
     receipt: `receipt_order_${Date.now()}`,
   };
@@ -43,11 +37,32 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
         return;
       }
 
-      // Store order in DB
-      await pool.query(
-        `INSERT INTO payments (order_id, course_id, amount, email, status) VALUES ($1, $2, $3, $4, 'pending')`,
-        [order.id, courseId, amount, email]
-      );
+      // Store order in Supabase
+      const { data, error } = await supabase
+        .from('payments')
+        .insert([
+          {
+            order_id: order.id,
+            amount,
+            email,
+            payment_id: '',
+            uid,
+          },
+        ]);
+
+      if (error) {
+        console.error('Error inserting order into Supabase:', error);
+        res.status(500).json({
+          success: false,
+          message: 'Failed to store order in database',
+        });
+        return;
+      }
+
+      // Cast data to any to bypass type checking error
+      const paymentData = data as any;
+
+      console.log('Order inserted into Supabase:', paymentData);
 
       res.status(200).json({
         success: true,
@@ -63,7 +78,7 @@ export const createOrder = async (req: Request, res: Response): Promise<void> =>
   }
 };
 
-// Verify Razorpay Payment
+// Verify Payment Function
 export const verifyPayment = async (req: Request, res: Response): Promise<void> => {
   const { order_id, payment_id, signature } = req.body;
 
@@ -82,17 +97,31 @@ export const verifyPayment = async (req: Request, res: Response): Promise<void> 
 
   if (generatedSignature === signature) {
     try {
-      const result = await pool.query(
-        `UPDATE payments SET payment_id = $1, signature = $2, status = 'paid' WHERE order_id = $3 RETURNING email`,
-        [payment_id, signature, order_id]
-      );
+      // Update payment_id in Supabase
+      const { data, error } = await supabase
+        .from('payments')
+        .update({ payment_id })
+        .eq('order_id', order_id)
+        .single(); // Use .single() to return a single row
 
-      const userEmail = result.rows[0]?.email;
+      if (error) {
+        console.error('DB error:', error);
+        res.status(500).json({
+          success: false,
+          message: 'Error updating payment status',
+        });
+        return;
+      }
 
+      // Cast data to any to bypass type checking error
+      const paymentData = data as any;
+
+      // Send success email
+      const userEmail = paymentData?.email;
       if (userEmail) {
         const msg = {
           to: userEmail,
-          from: 'your@email.com', // replace with verified sender
+          from: 'grid.pro11@gmail.com', // Replace with a valid email address
           subject: 'Payment Successful',
           text: 'Your payment was successfully received. Thank you for your purchase!',
         };

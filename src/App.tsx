@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React from 'react';
 import {
   BrowserRouter as Router,
@@ -15,6 +16,7 @@ import ScrollToTop from './components/ScrollToTop';
 import Login from './pages/Login/login';
 import Welcome from './pages/Welcome/welcome';
 import PrivateRoute from './components/PrivateRoute';
+import { createClient } from '@supabase/supabase-js';
 
 const AppWrapper: React.FC = () => {
   const location = useLocation();
